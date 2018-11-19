@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Promise</title>
+    <!-- <script src="./promise.js"></script> -->
+</head>
+<body>
+    promise
+</body>
+<script>
+//     console.log(Promise);
+
+// function fn1(resolve, reject) {
+//     setTimeout(function() {
+//         console.log('步骤一：执行');
+//         resolve('1');
+//     },1000);
+// }
+
+// function fn2(resolve, reject) {
+//     setTimeout(function() {
+//         console.log('步骤二：执行');
+//         resolve('2');
+//     },1500);
+// }
+
+// new Promise((resolve, reject) => {
+//     setTimeout(function() {
+//         console.log('步骤1：执行');
+//         let a = 1;
+//         if(a){
+//             resolve(11);
+//         }
+//         else {
+//             reject(22);
+//         }
+        
+//     },1500);
+// }).then(function(val){
+//     console.log(val);
+//     return new Promise(fn2);
+// }).then(function(val){
+//     console.log(val);
+//     return 33;
+// }).then(function(val){
+//     console.log(val);
+// });
+
+// let p = new Promise((resolve,reject) => {
+//     reject('hello');
+// })
+// p.then(console.log.bind(null,'hello'),console.error.bind(null,'baibai'));
+// p.then((value,error) => {
+//     console.log(value,error);
+// },(second) => {
+//     console.log('second:',second);
+// });
+
+
+
+// function getUserId() {
+//     return new Promise(function(resolve) {
+//         //异步请求
+//         http.get(url, function(results) {
+//             resolve(results.id)
+//         })
+//     })
+// }
+
+
+
+function Promisee(fn){
+    this.state = 'PENDING';
+    this.value = null;
+    this.onResolvedCallback = [] // Promise resolve时的回调函数集，因为在Promise结束之前有可能有多个回调添加到它上面
+    this.onRejectedCallback = [] 
+
+    resolve = (value) => {
+        this.state = 'RESOLVED'
+        this.value = value;
+        console.log('执行resolve');
+        console.log('resolveArr:',this.onResolvedCallback);
+        for(var i = 0; i < this.onResolvedCallback.length; i++) {
+            this.onResolvedCallback[i](value)
+        }
+    };
+    reject = (error) => {
+        this.state = 'REJECTED'
+        this.value = error;
+        console.log('执行reject');
+        console.log('rejectArr:',this.onRejectedCallback);
+        for(var i = 0; i < this.onRejectedCallback.length; i++) {
+            this.onRejectedCallback[i](value)
+        }
+    };
+    fn(resolve,reject)
+    this.then = function(onResole,onReject){
+        console.log('then得到执行，此时state：',this.state);
+        if(this.state === 'PENDING'){
+            console.log('then  push onResole');
+            this.onResolvedCallback.push(onResole);
+        }
+        else if(this.state === 'REJECTED'){
+            console.log('then  push onReject');
+            this.onRejectedCallback.push(onReject);
+        }
+        else {
+            console.log('else');
+        }
+    }
+
+    
+}
+
+let t = new Promisee((resolve,reject) => {
+    let a = 1;
+    setTimeout(() => {
+        if(a){
+            resolve(a);
+        }
+        else {
+            reject(a);
+        }
+    },1000);
+});
+
+t.then((value)=>{
+    console.log('最后回调打印value：',value);
+},(value) => {
+    console.log('最后error回调打印value：',value);
+});
+
+
+</script>
+</html>
