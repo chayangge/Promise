@@ -78,22 +78,28 @@ function Promisee(fn){
     this.onRejectedCallback = [] 
 
     resolve = (value) => {
-        this.state = 'RESOLVED'
-        this.value = value;
-        console.log('执行resolve');
-        console.log('resolveArr:',this.onResolvedCallback);
-        for(var i = 0; i < this.onResolvedCallback.length; i++) {
-            this.onResolvedCallback[i](value)
-        }
+        
+        setTimeout(() => {
+            console.log('set time out');
+            this.state = 'RESOLVED'
+            this.value = value;
+            console.log('执行resolve');
+            console.log('resolveArr:',this.onResolvedCallback);
+            for(var i = 0; i < this.onResolvedCallback.length; i++) {
+                this.onResolvedCallback[i](value)
+            }
+        },0);
     };
     reject = (error) => {
-        this.state = 'REJECTED'
-        this.value = error;
-        console.log('执行reject');
-        console.log('rejectArr:',this.onRejectedCallback);
-        for(var i = 0; i < this.onRejectedCallback.length; i++) {
-            this.onRejectedCallback[i](value)
-        }
+        setTimeout(() => {
+            this.state = 'REJECTED'
+            this.value = error;
+            console.log('执行reject');
+            console.log('rejectArr:',this.onRejectedCallback);
+            for(var i = 0; i < this.onRejectedCallback.length; i++) {
+                this.onRejectedCallback[i](value)
+            }
+        },0);
     };
     fn(resolve,reject)
     this.then = function(onResole,onReject){
@@ -106,7 +112,7 @@ function Promisee(fn){
             console.log('then  push onReject');
             this.onRejectedCallback.push(onReject);
         }
-        else {
+        else if(this.state === 'RESOLVED'){
             console.log('else');
         }
     }
@@ -116,14 +122,16 @@ function Promisee(fn){
 
 let t = new Promisee((resolve,reject) => {
     let a = 1;
-    setTimeout(() => {
-        if(a){
-            resolve(a);
-        }
-        else {
-            reject(a);
-        }
-    },1000);
+    // resolve(++a);
+    reject(++a);
+    // setTimeout(() => {
+    //     if(a === 2){
+    //         resolve(a);
+    //     }
+    //     else {
+    //         reject(a);
+    //     }
+    // },1000);
 });
 
 t.then((value)=>{
