@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+// cb 收集异步，then装填异步，
+class AsyncProcessor {
+    cb = [];
+    constructor(fn) {
+        fn(this.resolve.bind(this));
+    }
+    then(onFulfilled) {
+        this.cb.push(onFulfilled);
+        return this; // 链式
+    }
+    resolve(value) {
+        this.cb.forEach(fn => fn(value));
+    }
+}
+
+// 使用
+let p = new AsyncProcessor(resolve => {
+    setTimeout(() => {
+        console.log('done');
+        resolve('2秒');
+    }, 2000);
+}).then((tip) => {
+    console.log(tip);
+})
+// 问题：新建promise时，直接同步执行resolve时无效，原因：由于是同步执行，then在其后，cb还是空数组，改进方式：resolve追加异步：
+// resolve(value) {
+//     setTimeout(() => {
+//       this.cb.forEach(fn => fn(value));
+//     }, 0);
+// }
+
+</script>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+// cb 收集异步，then装填异步，
+class AsyncProcessor {
+    cb = [];
+    state = 'pending'; // 装填机标识，resolve中修改，意味着能够通过状态机判断是否执行了then，从而解决then先后执行的判断问题
+    value = null;//保存结果
+    constructor(fn) {
+        fn(this.resolve.bind(this));
+    }
+    then(onFulfilled) {
+        // 为pendding说明 new Promise 传的resolve是异步函数，还没有执行，then先执行，此时填如cb
+        if(this.state === 'pending') {
+          this.cb.push(onFulfilled);
+        }
+        // else说明 new Promise 传的resolve是同步函数，最先执行，then后执行，此时直接执行then中传入的回调即可
+        else {
+          onFulfilled(this.value);
+        }
+        return this; // 链式
+    }
+    resolve(value) {
+        this.state = 'fulfilled';//改变状态
+        this.value = value;//保存结果
+        this.callbacks.forEach(fn => fn(value));
+      
+    }
+}
+
+// 问题：在resolve执行后，用then追加进来的回到无法执行：
+let p = new AsyncProcessor(resolve => {
+    console.log('done');
+    resolve('2秒');
+}).then((tip) => {
+    console.log(tip);
+});
+
+// resolve执行后，才追加的then
+setTimeout(() => {
+  p.then((data) => {
+    console.log(data);
+  })
+});
+
+// 解决办法：引入状态机
+</script>
+</html>
